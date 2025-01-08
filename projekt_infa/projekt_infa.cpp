@@ -2,7 +2,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
 #include <iostream>
-#include <math.h> // do funkcji cos() i sin()
+#include <math.h> 
 
 using namespace sf;
 
@@ -20,26 +20,30 @@ public:
     // Konstruktor
     Pacman(float startX, float startY, float radius, float speed)
         : position(startX, startY), speed(speed), mouthOpen(true), pacRadius(radius) {
-        pacBody.setPointCount(32); // Punktów wystarczająco dużo, aby Pac-Man wyglądał gładko
-        pacBody.setFillColor(Color::Yellow); // Kolor żółty
+        pacBody.setPointCount(32); 
+        pacBody.setFillColor(Color::Yellow); 
         pacBody.setOrigin(radius, radius); // Środek jako punkt odniesienia
         pacBody.setPosition(position);
-        updateShape(); // Ustaw początkowy kształt (usta otwarte)
+        updateShape(); 
     }
 
     // Funkcja do zmiany kierunku ruchu
     void changeDirection(Keyboard::Key key) {
         if (key == Keyboard::Up) {
             velocity = { 0, -speed };
+            pacBody.setRotation(270);
         }
         else if (key == Keyboard::Down) {
             velocity = { 0, speed };
+            pacBody.setRotation(90);
         }
         else if (key == Keyboard::Left) {
             velocity = { -speed, 0 };
+            pacBody.setRotation(180);
         }
         else if (key == Keyboard::Right) {
             velocity = { speed, 0 };
+            pacBody.setRotation(0);
         }
     }
 
@@ -67,16 +71,15 @@ public:
 
     // Funkcja do aktualizacji kształtu Pac-Mana
     void updateShape() {
-        int startAngle = mouthOpen ? 15 : 0;  // Start angle (15° if mouth open, 0° if closed)
-        int endAngle = mouthOpen ? 345 : 360; // End angle (345° if mouth open, 360° if closed)
+        int startAngle = mouthOpen ? 30 : 0;  
+        int endAngle = mouthOpen ? 330 : 360; 
 
-        int numPoints = 2 + (endAngle - startAngle); // Total points (1 center + points on arc)
+        int numPoints = 2 + (endAngle - startAngle); 
         pacBody.setPointCount(numPoints); // Set the number of points
 
-        // Center point (for the wedge shape)
+        
         pacBody.setPoint(0, { pacRadius, pacRadius });
 
-        // Add points around the arc
         int index = 1; // Start from the first point after the center
         for (int angle = startAngle; angle <= endAngle; ++angle) {
             float radian = angle * 3.14159f / 180.f; // Convert to radians
@@ -105,7 +108,7 @@ int main() {
     RenderWindow window(VideoMode(screenWidth, screenHeight), "Pacman Game");
 
     // Tworzymy Pac-Mana
-    Pacman pacman(screenWidth / 2, screenHeight / 2, 25.f, 0.2f);
+    Pacman pacman(screenWidth / 2, screenHeight / 2, 25.f, 0.1f);
 
     while (window.isOpen()) {
         Event event;
