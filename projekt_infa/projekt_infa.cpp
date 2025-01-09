@@ -2,32 +2,85 @@
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
 #include <iostream>
-#include <math.h> 
+#include <vector>
+#include <math.h>
 
 using namespace sf;
 
-class Pacman {
+// Maze class
+class Maze {
 private:
-    ConvexShape pacBody;       // Kształt Pac-Mana
-    Vector2f position;         // Pozycja
-    Vector2f velocity;         // Prędkość
-    float speed;               // Prędkość ruchu
-    bool mouthOpen;            // Czy usta są otwarte
-    Clock animationClock;      // Zegar do animacji
-    float pacRadius;           // Promień Pac-Mana
+    std::vector<std::vector<int>> layout; 
+    float tileSize;
+    Color wallColor;
 
 public:
-    // Konstruktor
-    Pacman(float startX, float startY, float radius, float speed)
-        : position(startX, startY), speed(speed), mouthOpen(true), pacRadius(radius) {
-        pacBody.setPointCount(32); 
-        pacBody.setFillColor(Color::Yellow); 
-        pacBody.setOrigin(radius, radius); // Środek jako punkt odniesienia
-        pacBody.setPosition(position);
-        updateShape(); 
+    // Constructor
+    Maze(const std::vector<std::vector<int>>& layout, float tileSize, Color wallColor = Color::Blue)
+        : layout(layout), tileSize(tileSize), wallColor(wallColor) {
     }
 
-    // Funkcja do zmiany kierunku ruchu
+    // Render maze
+    void renderMaze(RenderWindow& window) const {
+        for (size_t y = 0; y < layout.size(); ++y) {
+            for (size_t x = 0; x < layout[y].size(); ++x) {
+                if (layout[y][x] == 1) { //wall
+                    RectangleShape wall(Vector2f(tileSize, tileSize));
+                    wall.setFillColor(wallColor);
+                    wall.setPosition(x * tileSize, y * tileSize);
+                    window.draw(wall);
+                }
+            }
+        }
+    }
+
+    bool isWalkable(Vector2f position, float radius) const {
+        // Lista punktów do sprawdzenia (cztery punkty: góra, dół, lewo, prawo)
+        std::vector<Vector2f> points = {
+            {position.x - (radius), position.y},     // Lewy brzeg
+            {position.x + (radius), position.y},     // Prawy brzeg
+            {position.x, position.y - (radius)},     // Górny brzeg
+            {position.x, position.y + (radius)}      // Dolny brzeg
+        };
+
+        // Sprawdzamy każdy punkt
+        for (const auto& point : points) {
+            int gridX = point.x / tileSize;
+            int gridY = point.y / tileSize;
+
+            // Jeśli punkt jest poza granicami lub w kolizji ze ścianą
+            if (gridX < 0 || gridX >= layout[0].size() || gridY < 0 || gridY >= layout.size() || layout[gridY][gridX] != 0) {
+                return false;
+            }
+        }
+
+        return true; // Wszystkie punkty są przejezdne
+    }
+};
+
+// Pacman class
+class Pacman {
+private:
+    ConvexShape pacBody;
+    Vector2f position;
+    Vector2f velocity;
+    float speed;
+    bool mouthOpen;
+    Clock animationClock;
+    float pacRadius;
+
+public:
+    // Constructor
+    Pacman(float startX, float startY, float radius, float speed)
+        : position(startX, startY), speed(speed), mouthOpen(true), pacRadius(radius) {
+        pacBody.setPointCount(32);
+        pacBody.setFillColor(Color::Yellow);
+        pacBody.setOrigin(radius, radius);
+        pacBody.setPosition(position);
+        updateShape();
+    }
+
+    // Change direction
     void changeDirection(Keyboard::Key key) {
         if (key == Keyboard::Up) {
             velocity = { 0, -speed };
@@ -47,68 +100,83 @@ public:
         }
     }
 
-    // Funkcja do ruchu
-    void move(float screenWidth, float screenHeight) {
-        position += velocity;
+    // Move Pac-Man
+    void move(const Maze& maze) {
+        Vector2f newPosition = position + velocity;
 
-        // Wyjście za ekran (Pac-Man wraca na przeciwną stronę)
-        if (position.x < 0) position.x = screenWidth;
-        if (position.x > screenWidth) position.x = 0;
-        if (position.y < 0) position.y = screenHeight;
-        if (position.y > screenHeight) position.y = 0;
+        // Sprawdź, czy wszystkie punkty wokół Pac-Mana (jego narożniki) mogą się poruszyć
+        if (maze.isWalkable(newPosition, pacRadius)) {
+            position = newPosition; // Aktualizacja pozycji, jeśli przejście jest możliwe
+        }
 
-        pacBody.setPosition(position);
+        pacBody.setPosition(position); // Ustaw nową pozycję Pac-Mana
     }
 
-    // Funkcja do animacji ust
+    // Animate Pac-Man's mouth tez dziala
     void animateMouth() {
         if (animationClock.getElapsedTime().asMilliseconds() > 200) {
-            mouthOpen = !mouthOpen; // Przełącz stan ust (otwarte/zamknięte)
+            mouthOpen = !mouthOpen;
             animationClock.restart();
-            updateShape(); // Zaktualizuj kształt
+            updateShape();
         }
     }
 
-    // Funkcja do aktualizacji kształtu Pac-Mana
+    // Update Pac-Man's shape dziala juz nie zmieniam tego
     void updateShape() {
-        int startAngle = mouthOpen ? 30 : 0;  
-        int endAngle = mouthOpen ? 330 : 360; 
+        int startAngle = mouthOpen ? 30 : 0;
+        int endAngle = mouthOpen ? 330 : 360;
 
-        int numPoints = 2 + (endAngle - startAngle); 
-        pacBody.setPointCount(numPoints); // Set the number of points
+        int numPoints = 2 + (endAngle - startAngle);
+        pacBody.setPointCount(numPoints);
 
-        
         pacBody.setPoint(0, { pacRadius, pacRadius });
 
-        int index = 1; // Start from the first point after the center
+        int index = 1;
         for (int angle = startAngle; angle <= endAngle; ++angle) {
-            float radian = angle * 3.14159f / 180.f; // Convert to radians
-            float x = pacRadius + pacRadius * cos(radian); // X-coordinate
-            float y = pacRadius + pacRadius * sin(radian); // Y-coordinate
-            pacBody.setPoint(index++, { x, y }); // Add the point and increment the index
+            float radian = angle * 3.14159f / 180.f;
+            float x = pacRadius + pacRadius * cos(radian);
+            float y = pacRadius + pacRadius * sin(radian);
+            pacBody.setPoint(index++, { x, y });
         }
     }
-    // Funkcja do rysowania Pac-Mana
-    void render(RenderWindow& window) {
+
+    // Render Pac-Man dziala
+    void renderPacman(RenderWindow& window) {
         window.draw(pacBody);
     }
 
-    // Funkcja aktualizująca Pac-Mana (ruch + animacja)
-    void update(float screenWidth, float screenHeight) {
-        move(screenWidth, screenHeight);
+    // Update Pac-Man dziala
+    void update(const Maze& maze) {
+        move(maze);
         animateMouth();
     }
 };
 
+// Main function
 int main() {
     const float screenWidth = 800;
     const float screenHeight = 600;
+    const float tileSize = 41;
 
-    // Tworzymy okno
     RenderWindow window(VideoMode(screenWidth, screenHeight), "Pacman Game");
 
-    // Tworzymy Pac-Mana
-    Pacman pacman(screenWidth / 2, screenHeight / 2, 25.f, 0.1f);
+    // Define the maze layout
+    std::vector<std::vector<int>> mazeLayout = {
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1},
+        {1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    };
+
+    Maze maze(mazeLayout, tileSize);
+    Pacman pacman(screenWidth / 2, screenHeight / 2, 20.f, 0.3);
 
     while (window.isOpen()) {
         Event event;
@@ -119,15 +187,14 @@ int main() {
             if (event.type == Event::KeyPressed) {
                 if (event.key.code == Keyboard::Escape)
                     window.close();
-
-                // Zmiana kierunku Pac-Mana
                 pacman.changeDirection(event.key.code);
             }
         }
 
         window.clear();
-        pacman.update(screenWidth, screenHeight); // Ruch i animacja Pac-Mana
-        pacman.render(window);                   // Rysowanie Pac-Mana
+        maze.renderMaze(window);
+        pacman.update(maze);
+        pacman.renderPacman(window);
         window.display();
     }
 
