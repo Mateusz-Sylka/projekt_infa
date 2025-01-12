@@ -112,7 +112,7 @@ public:
         pacBody.setPosition(position); // Ustaw nową pozycję Pac-Mana
     }
 
-    // Animate Pac-Man's mouth tez dziala
+    // Animate Pac-Man's mouth
     void animateMouth() {
         if (animationClock.getElapsedTime().asMilliseconds() > 200) {
             mouthOpen = !mouthOpen;
@@ -140,15 +140,73 @@ public:
         }
     }
 
-    // Render Pac-Man dziala
+    // Render Pac-Man
     void renderPacman(RenderWindow& window) {
         window.draw(pacBody);
     }
 
-    // Update Pac-Man dziala
+    // Update Pac-Man
     void update(const Maze& maze) {
         move(maze);
         animateMouth();
+    }
+};
+
+class duch {
+private:
+    CircleShape duchHEAD;
+    RectangleShape duchLEGS;
+    Vector2f positionD;
+    float speedD;
+    Vector2f velocityD;
+    
+public:
+    duch(float startX, float startY, Color color, float speed, float Dradius) :
+        positionD(startX, startY), speedD(speed) {
+
+        duchHEAD.setRadius(Dradius);            //Duchhead
+        duchHEAD.setFillColor(color);
+        duchHEAD.setOrigin(duchHEAD.getRadius(), duchHEAD.getRadius());
+        duchHEAD.setPosition(positionD);
+
+        duchLEGS.setSize(Vector2f(2*duchHEAD.getRadius(), duchHEAD.getRadius()));       //duchlegs
+        duchLEGS.setFillColor(color);
+        duchLEGS.setOrigin(duchLEGS.getSize().x / 2, 0);
+        duchLEGS.setPosition(positionD);
+    }
+    // Change direction
+    void D_changeDirection(Keyboard::Key key) {
+        if (key == Keyboard::Right) {
+            velocityD = { 0, -speedD };
+            duchLEGS.setRotation(270);
+            duchHEAD.setRotation(270);
+        }
+        else if (key == Keyboard::Left) {
+            velocityD = { 0, speedD };
+            duchLEGS.setRotation(90);
+            duchHEAD.setRotation(90);
+        }
+        else if (key == Keyboard::Up) {
+            velocityD = { -speedD, 0 };
+            duchLEGS.setRotation(180);
+            duchHEAD.setRotation(180);
+        }
+        else if (key == Keyboard::Down) {
+            velocityD = { speedD, 0 };
+            duchLEGS.setRotation(0);
+            duchHEAD.setRotation(0);
+        }
+    }
+
+
+
+
+
+
+    // Render Duch
+    void renderDuch(RenderWindow& window) {
+        window.draw(duchLEGS);
+        window.draw(duchHEAD);
     }
 };
 
@@ -176,7 +234,8 @@ int main() {
     };
 
     Maze maze(mazeLayout, tileSize);
-    Pacman pacman(screenWidth / 2, screenHeight / 2, 20.f, 0.3);
+    Pacman pacman(tileSize*1.5, tileSize*1.5, ((tileSize/2)-0.05), 0.06);
+    duch P1(screenWidth / 2, screenHeight / 2,Color::White,10,tileSize/2);
 
     while (window.isOpen()) {
         Event event;
@@ -188,12 +247,14 @@ int main() {
                 if (event.key.code == Keyboard::Escape)
                     window.close();
                 pacman.changeDirection(event.key.code);
+                P1.D_changeDirection(event.key.code);
             }
         }
 
         window.clear();
         maze.renderMaze(window);
         pacman.update(maze);
+        P1.renderDuch(window);
         pacman.renderPacman(window);
         window.display();
     }
