@@ -6,6 +6,95 @@
 #include <cmath>
 
 using namespace sf;
+class WarpGate {
+private:
+    RectangleShape gate;
+    bool activated;
+
+public:
+    WarpGate(float x, float y, float size, Color color)
+        : activated(false) {
+        gate.setSize({ size, size });
+        gate.setFillColor(color);
+        gate.setOrigin(size / 2, size / 2);
+        gate.setPosition(x, y);
+    }
+
+    void render(RenderWindow& window) const {
+        window.draw(gate);
+    }
+
+    bool checkCollision(Vector2f colliderPosition, float colliderRadius) {
+        // Get the center of the gate
+        Vector2f gateCenter = gate.getPosition();
+
+        // Calculate the squared distance between the collider and the gate center
+        float deltaX = colliderPosition.x - gateCenter.x;
+        float deltaY = colliderPosition.y - gateCenter.y;
+        float distanceSquared = deltaX * deltaX + deltaY * deltaY;
+
+        // Calculate the sum of the radii
+        float combinedRadii = colliderRadius + gate.getSize().x / 2;
+
+        // Compare squared distances to avoid using the expensive square root function
+        return distanceSquared < combinedRadii * combinedRadii;
+    }
+
+    bool isActivated() const {
+        return activated;
+    }
+
+    void activate() {
+        activated = true;
+    }
+};
+
+class Spike {
+private:
+    ConvexShape spike;
+    float tileSize;
+
+public:
+    Spike(float x, float y, float size, int orientation)
+        : tileSize(size) {
+        // Define spike shape
+        spike.setPointCount(3);
+        spike.setPoint(0, { 0, size });
+        spike.setPoint(1, { size / 2, 0 });
+        spike.setPoint(2, { size, size });
+        spike.setFillColor(Color::Red);
+        spike.setOrigin(size / 2, size / 2);
+        spike.setPosition(x, y);
+
+        // Rotate spike based on orientation
+        // 0: Up, 1: Right, 2: Down, 3: Left
+        if (orientation == 0) {
+            spike.setRotation(0); // Pointing up
+        }
+        else if (orientation == 1) {
+            spike.setRotation(90); // Pointing right
+        }
+        else if (orientation == 2) {
+            spike.setRotation(180); // Pointing down
+        }
+        else if (orientation == 3) {
+            spike.setRotation(270); // Pointing left
+        }
+    }
+
+    void render(RenderWindow& window) const {
+        window.draw(spike);
+    }
+
+    bool checkCollision(Vector2f colliderPosition, float colliderRadius) const {
+        FloatRect spikeBounds = spike.getGlobalBounds();
+        Vector2f spikeCenter(spikeBounds.left + spikeBounds.width / 2,
+            spikeBounds.top + spikeBounds.height / 2);
+        float distance = std::sqrt(std::pow(colliderPosition.x - spikeCenter.x, 2) +
+            std::pow(colliderPosition.y - spikeCenter.y, 2));
+        return distance < colliderRadius + tileSize / 2;
+    }
+};
 
 class Coin {
 private:
@@ -33,7 +122,7 @@ public:
         return collected;
     }
 
-    // Check if Pacman or ghost collects the coin
+    // Check if ghost collects the coin
     bool checkCollision(Vector2f colliderPosition, float colliderRadius) {
         if (!collected) {
             Vector2f coinPosition = shape.getPosition();
@@ -51,33 +140,90 @@ public:
 // Maze class
 class Maze {
 private:
+    WarpGate warpGate; 
     std::vector<std::vector<int>> layout;
     float tileSize;
     Color wallColor;
-    std::vector<Coin> coins; // Store coins in the maze
+    std::vector<Coin> coins;
+    std::vector<Spike> spikes; // Store spikes in the maze
 
 public:
     Maze(const std::vector<std::vector<int>>& layout, float tileSize, Color wallColor = Color::Magenta)
-        : layout(layout), tileSize(tileSize), wallColor(wallColor) {
+        : layout(layout), tileSize(tileSize), wallColor(wallColor),
+        warpGate(0, 0, tileSize, Color::Cyan) { // Initialize warp gate with default values
         initializeCoins();
+        initializeSpikes();
+        initializeWarpGate(); // Initialize warp gate
     }
 
     // Render maze
+    // Render maze including spikes
     void render(RenderWindow& window) const {
         for (size_t y = 0; y < layout.size(); ++y) {
             for (size_t x = 0; x < layout[y].size(); ++x) {
-                if (layout[y][x] == 1) { // wall
+                if (layout[y][x] == 1) { // Wall
                     RectangleShape wall(Vector2f(tileSize, tileSize));
                     wall.setFillColor(wallColor);
                     wall.setPosition(static_cast<float>(x) * tileSize, static_cast<float>(y) * tileSize);
                     window.draw(wall);
+
                 }
             }
         }
-        for (const auto& coin : coins) {
+        for (const auto& coin : coins) 
             coin.render(window);
+        
+        for (const auto& spike : spikes) 
+            spike.render(window);
+        
+        
+            warpGate.render(window); // Render warp gate
+    }
+    void initializeWarpGate() {
+        for (size_t y = 0; y < layout.size(); ++y) {
+            for (size_t x = 0; x < layout[y].size(); ++x) {
+                if (layout[y][x] == 4) { // 4 denotes warp gate in layout
+                    warpGate = WarpGate((x + 0.5f) * tileSize, (y + 0.5f) * tileSize, tileSize, Color::Cyan);
+                    break;
+                }
+            }
         }
     }
+    bool checkWarpGateCollision(Vector2f colliderPosition, float colliderRadius) {
+        return warpGate.checkCollision(colliderPosition, colliderRadius);
+    }
+
+    void initializeSpikes() {
+        for (size_t y = 0; y < layout.size(); ++y) {
+            for (size_t x = 0; x < layout[y].size(); ++x) {
+                if (layout[y][x] == 3) { // Use 3 to denote spike in the layout
+                    int orientation = 0;
+
+                    // Check neighboring cells to determine orientation
+                    if (y > 0 && layout[y - 1][x] == 1) orientation = 2; // Point down if wall above
+                    else if (y < layout.size() - 1 && layout[y + 1][x] == 1) orientation = 0; // Point up if wall below
+                    else if (x > 0 && layout[y][x - 1] == 1) orientation = 1; // Point right if wall to the left
+                    else if (x < layout[y].size() - 1 && layout[y][x + 1] == 1) orientation = 3; // Point left if wall to the right
+                    else if (x < layout[y].size() - 1 && layout[y][x + 1] == 1 && y < layout.size() - 1 && layout[y + 1][x] == 1) orientation = 0; //right down - point up
+                    else if (y > 0 && layout[y - 1][x] == 1 && x < layout[y].size() - 1 && layout[y][x + 1] == 1) orientation = 2;//up-right - point down
+                    else if (x < layout[y].size() - 1 && layout[y][x + 1] == 1 && y < layout.size() - 1 && layout[y + 1][x] == 1) orientation = 0; // left-down - point up
+
+                    spikes.emplace_back((x + 0.5f) * tileSize, (y + 0.5f) * tileSize, tileSize, orientation);
+                }
+            }
+        }
+    }
+
+    // Check for spike collisions
+    bool checkSpikeCollision(Vector2f colliderPosition, float colliderRadius) const {
+        for (const auto& spike : spikes) {
+            if (spike.checkCollision(colliderPosition, colliderRadius)) {
+                return true; // Spike collision detected
+            }
+        }
+        return false;
+    }
+
 
     // Check for coin collisions
     bool checkCoinCollision(Vector2f colliderPosition, float colliderRadius) {
@@ -241,16 +387,27 @@ public:
             ghostHead.setRotation(0);
         }
     }
+    Vector2f getPosition() const {
+        return position;
+    }
+
+    float getRadius() const {
+        return ghostHead.getRadius();
+    }
 
     void move(Maze& maze) {
         Vector2f newPosition = position + velocity;
+
+        if (maze.checkSpikeCollision(newPosition, ghostHead.getRadius())) {
+            std::cout << "Game Over! Ghost hit a spike!" << std::endl;
+            exit(0); // Exit the game
+        }
 
         if (maze.isWalkable(newPosition, ghostHead.getRadius())) {
             position = newPosition;
         }
 
         if (maze.checkCoinCollision(position, ghostHead.getRadius())) {
-            // Coin was collected by the ghost
             std::cout << "Ghost collected a coin!" << std::endl;
         }
 
@@ -275,16 +432,16 @@ int main() {
 
     // Define the maze layout
     std::vector<std::vector<int>> mazeLayout = {
-        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        {1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1},
-        {1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 0, 2, 0, 2, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 2, 1},
+        {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 2, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1},
+        {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 1},
+        {1, 3, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+        {1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 3, 3, 3, 1},
         {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     };
 
@@ -302,6 +459,10 @@ int main() {
                 if (event.key.code == Keyboard::Escape)
                     window.close();
                 ghost.changeDirection(event.key.code);
+            }
+            if (maze.checkWarpGateCollision(ghost.getPosition(), ghost.getRadius())) {
+                std::cout << "Warp gate activated! Transitioning to the next level..." << std::endl;
+                // Load next level or change layout here
             }
         }
 
