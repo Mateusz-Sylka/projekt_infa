@@ -147,7 +147,7 @@ int main() {            // Main function
             }
 
             // Check for warp gate collisions and move to next level
-            if (mazes[currentLevel].checkWarpGateCollision(pacman.getPosition(), pacman.getRadius())) {
+            if (mazes[currentLevel].checkWarpGateCollision(ghost.getPosition(), ghost.getRadius())) {
                 std::cout << "Warp gate used! Moving to next level..." << std::endl;
                 currentLevel = (currentLevel + 1) % totalLevels;  // Wrap around to the first level if at the end
 
