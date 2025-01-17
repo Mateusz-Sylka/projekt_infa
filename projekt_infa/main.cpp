@@ -11,6 +11,7 @@
 #include "Maze.h"
 #include "Pacman.h"
 #include "Ghost.h"
+#include "MazeLayouts.h"
 
 using namespace sf;
 
@@ -27,6 +28,7 @@ enum class GameState {
     Exiting,
     Help
 };
+
 
 int main() {            // Main function
     Font font;
@@ -58,55 +60,19 @@ int main() {            // Main function
 
 
     // Define the maze layout
-    std::vector<std::vector<int>> mazeLayout1 = {
-        {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        {0, 1, 0, 0, 0, 1, 1, 2, 0, 4, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1},
-        {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        {0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1},
-        {0, 0, 1, 0, 0, 1, 1, 0, 2, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-        {0, 0, 1, 2, 2, 1, 1, 0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-        {0, 0, 1, 2, 2, 1, 0, 2, 0, 1, 2, 1, 1, 1, 0, 0, 0, 0, 2, 1},
-        {0, 0, 1, 2, 2, 1, 2, 1, 2, 1, 2, 2, 2, 0, 0, 0, 0, 0, 0, 1},
-        {0, 0, 1, 0, 2, 2, 0, 2, 0, 1, 2, 0, 2, 1, 0, 0, 3, 3, 3, 1},
-        {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    };
-    std::vector<std::vector<int>> mazeLayout2 = {
-      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-      {0, 1, 0, 0, 0, 1, 1, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1},
-      {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-      {0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-      {0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1},
-      {0, 0, 1, 0, 0, 1, 1, 0, 2, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-      {0, 0, 1, 2, 2, 1, 1, 0, 0, 1, 2, 1, 0, 0, 0, 0, 0, 0, 0, 1},
-      {0, 0, 1, 2, 2, 1, 0, 2, 0, 2, 2, 1, 1, 1, 0, 0, 0, 0, 2, 1},
-      {0, 0, 1, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 1},
-      {0, 0, 1, 0, 2, 2, 0, 2, 2, 2, 2, 0, 2, 1, 0, 0, 3, 3, 3, 1},
-      {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    };
-    std::vector<std::vector<int>> mazeLayout3 = {
-      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-      {0, 1, 0, 0, 0, 1, 1, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1},
-      {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-      {0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-      {0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1},
-      {0, 0, 1, 0, 0, 1, 1, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-      {0, 0, 1, 2, 2, 1, 1, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-      {0, 0, 1, 2, 2, 1, 0, 2, 0, 2, 2, 0, 1, 1, 0, 0, 0, 0, 2, 1},
-      {0, 0, 1, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 1},
-      {0, 0, 1, 0, 0, 2, 0, 2, 2, 2, 2, 0, 2, 1, 0, 0, 3, 3, 3, 1},
-      {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    };
-
     Maze maze1(mazeLayout1, tileSize);
     Maze maze2(mazeLayout2, tileSize);
     Maze maze3(mazeLayout3, tileSize);
+    Maze maze4(mazeLayout4, tileSize);
+    std::vector<Maze> mazes = { maze1, maze2, maze3,maze4 };
+
+
     Pacman pacman(tileSize * 12.5f, tileSize * 1.5f, tileSize / 2.f - 0.05f, 0.06f);
     Ghost ghost(10.5*tileSize, 9.5*tileSize, Color::White, 1.f, tileSize / 2.f - 1.f);
-    Maze labirynt(mazeLayout1, tileSize);
-    std::vector<Maze> mazes = { maze1, maze2, maze3};
+   
     int currentLevel = 0;
-
+    int current_score = 0;
+    int totalLevels = mazes.size();
 
     while (window.isOpen()) {
         Event event;
@@ -116,7 +82,7 @@ int main() {            // Main function
 
             if (event.type == Event::KeyPressed) {
                 if (event.key.code == Keyboard::Escape) {
-                    window.close();
+                    currentState = GameState::Exiting;                  
                 }
                 else if (currentState == GameState::Menu) {
                     // Handle menu navigation
@@ -154,8 +120,6 @@ int main() {            // Main function
                 }
             }
         }
-
-
         window.clear();
 
         if (currentState == GameState::Menu) {
@@ -163,46 +127,39 @@ int main() {            // Main function
             for (const auto& text : menuText)
                 window.draw(text);
         }
+        else if(currentState == GameState::Exiting) {
+            window.close();
+        }
         else if (currentState == GameState::Playing) {
-            // Render the game
-    
-            
-            maze1.render(window);
+            // Render the game      
+            mazes[currentLevel].render(window);
             pacman.renderPacman(window);
             ghost.render(window);
-            ghost.move(maze1);    // Move ghost
-            pacman.update(maze1); // Update Pac-Man logic
 
+            // Update movements
+            ghost.move(mazes[currentLevel]);
+            pacman.update(mazes[currentLevel]);
+
+            // Check for collisions
             if (pacman.checkCollisionWithGhost(ghost.getPosition(), ghost.getRadius())) {
                 std::cout << "Collision! Pac-Man is caught!" << std::endl;
-          
+               // currentState = GameState::GameOver;  // You can transition to a game over state here
             }
-            else if (maze1.checkWarpGateCollision(ghost.getPosition(), ghost.getRadius())) {
-                window.clear();
-                maze2.render(window); 
+
+            // Check for warp gate collisions and move to next level
+            if (mazes[currentLevel].checkWarpGateCollision(pacman.getPosition(), pacman.getRadius())) {
+                std::cout << "Warp gate used! Moving to next level..." << std::endl;
+                currentLevel = (currentLevel + 1) % totalLevels;  // Wrap around to the first level if at the end
+
+                // Reset positions for the new level
+                pacman.setPosition(Vector2f(tileSize * 12.5f, tileSize * 1.5f));  // Example starting position for Pacman
+                ghost.setPosition(tileSize * 10.5f, tileSize * 9.5f);    // Example starting position for Ghost
             }
         }
+       // else if (currentState == GameState::GameOver) {
+            // Render game over screen (not implemented here)
+       // }
 
         window.display();
     }
-
-
-
-    return 0;
 }           
-/*maze1.render(window);
-pacman.update(maze1);
-ghost.move(maze1);
-ghost.render(window);
-pacman.renderPacman(window);
-window.display();
-if (maze1.checkWarpGateCollision(ghost.getPosition(), ghost.getRadius())) {
-    window.clear();
-
-    maze2.render(window);
-    window.display();
-}
-if (pacman.checkCollisionWithGhost(ghost.getPosition(), ghost.getRadius())) {
-    std::cout << "Collision! Pac-Man is caught!" << std::endl;
-    window.close();
-}*/

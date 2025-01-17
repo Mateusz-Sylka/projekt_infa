@@ -69,3 +69,8 @@ void Ghost::render(RenderWindow& window) const {
     window.draw(ghostLegs);
     window.draw(ghostHead);
 }
+void Ghost::setPosition(float x, float y) {
+    position = { x, y };
+    ghostHead.setPosition(position);
+    ghostLegs.setPosition(position);
+}

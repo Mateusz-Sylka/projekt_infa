@@ -23,6 +23,8 @@ public:
     float getRadius() const;
     void move(Maze& maze);
     void render(RenderWindow& window) const;
+    void setPosition(float x, float y);
+
 };
 
 #endif // GHOST_H

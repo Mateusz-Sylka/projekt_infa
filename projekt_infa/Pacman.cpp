@@ -62,3 +62,22 @@ void Pacman::update(const Maze& maze) {
     move(maze);
     animateMouth();
 }
+
+void Pacman::setPosition(sf::Vector2f newPosition) {
+    position = newPosition;
+    pacBody.setPosition(position);
+}
+
+void Pacman::setRadius(float newRadius) {
+    pacRadius = newRadius;
+    pacBody.setOrigin(pacRadius, pacRadius);
+    updateShape(); // Recalculate the shape with the new radius
+}
+
+float Pacman::getRadius() const {
+    return pacRadius;
+}
+
+Vector2f Pacman::getPosition() const {
+    return position;
+}
