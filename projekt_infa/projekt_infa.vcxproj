@@ -130,7 +130,21 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Coins.cpp" />
+    <ClCompile Include="Ghost.cpp" />
+    <ClCompile Include="Maze.cpp" />
+    <ClCompile Include="Pacman.cpp" />
     <ClCompile Include="projekt_infa.cpp" />
+    <ClCompile Include="Spike.cpp" />
+    <ClCompile Include="WarpGate.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Coins.h" />
+    <ClInclude Include="Ghost.h" />
+    <ClInclude Include="Maze.h" />
+    <ClInclude Include="Pacman.h" />
+    <ClInclude Include="Spike.h" />
+    <ClInclude Include="WarpGate.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
