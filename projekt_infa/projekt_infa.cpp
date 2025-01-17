@@ -162,7 +162,7 @@ int main() {            // Main function
                     else if (maze1.checkWarpGateCollision(ghost.getPosition(), ghost.getRadius()))
                     {
                         window.clear();
-                        maze2.render(window);
+                        maze2.render(window);//
                     }
 
                     
