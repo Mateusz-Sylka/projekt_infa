@@ -40,6 +40,7 @@ Vector2f Ghost::getPosition() const {
     return position;
 }
 
+
 float Ghost::getRadius() const {
     return ghostHead.getRadius();
 }

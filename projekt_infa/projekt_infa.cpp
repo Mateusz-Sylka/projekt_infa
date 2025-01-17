@@ -150,25 +150,11 @@ int main() {            // Main function
                 }
                 else if (currentState == GameState::Playing) {
                     // Handle game-specific controls
-                    pacman.update(maze1);
-                    ghost.move(maze1);
-                    ghost.changeDirection(event.key.code);
-
-                    if (pacman.checkCollisionWithGhost(ghost.getPosition(), ghost.getRadius())) 
-                    {
-                        std::cout << "Collision! Pac-Man is caught!" << std::endl;
-                        window.close();
-                    }
-                    else if (maze1.checkWarpGateCollision(ghost.getPosition(), ghost.getRadius()))
-                    {
-                        window.clear();
-                        maze2.render(window);//
-                    }
-
-                    
+                    ghost.changeDirection(event.key.code);  // Change direction on key press
                 }
             }
         }
+
 
         window.clear();
 
@@ -179,13 +165,27 @@ int main() {            // Main function
         }
         else if (currentState == GameState::Playing) {
             // Render the game
+    
+            
             maze1.render(window);
             pacman.renderPacman(window);
             ghost.render(window);
+            ghost.move(maze1);    // Move ghost
+            pacman.update(maze1); // Update Pac-Man logic
+
+            if (pacman.checkCollisionWithGhost(ghost.getPosition(), ghost.getRadius())) {
+                std::cout << "Collision! Pac-Man is caught!" << std::endl;
+          
+            }
+            else if (maze1.checkWarpGateCollision(ghost.getPosition(), ghost.getRadius())) {
+                window.clear();
+                maze2.render(window); 
+            }
         }
 
         window.display();
     }
+
 
 
     return 0;
