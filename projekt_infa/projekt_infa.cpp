@@ -21,17 +21,26 @@ void centerText(Text& text, RenderWindow& window) {
     text.setPosition(window.getSize().x / 2.0f, text.getPosition().y);
 }
 
+enum class GameState {
+    Menu,
+    Playing,
+    Exiting,
+    Help
+};
 
 int main() {            // Main function
-    sf::Font font;
+    Font font;
     if (!font.loadFromFile("assets/fonts/arial.ttf")) 
-        return -1; // Handle font loading error
+        return -1;
+
+    GameState currentState = GameState::Menu;
     
     const float tileSize = 41;
     const float screenHeight = 11 * tileSize;
     const float screenWidth = 20 * tileSize;
+  
 
-    RenderWindow window(VideoMode(static_cast<unsigned int>(screenWidth), static_cast<unsigned int>(screenHeight)), "Pacman Game");
+    RenderWindow window(VideoMode(screenWidth, screenHeight), "Extra gra :)");
 
     std::vector<std::string> menuItems = { "Start Game", "Options", "Exit" };       //menu items
     std::vector<sf::Text> menuText;
@@ -75,13 +84,29 @@ int main() {            // Main function
       {0, 0, 1, 0, 2, 2, 0, 2, 2, 2, 2, 0, 2, 1, 0, 0, 3, 3, 3, 1},
       {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
     };
+    std::vector<std::vector<int>> mazeLayout3 = {
+      {0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+      {0, 1, 0, 0, 0, 1, 1, 2, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1},
+      {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+      {0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+      {0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1},
+      {0, 0, 1, 0, 0, 1, 1, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+      {0, 0, 1, 2, 2, 1, 1, 0, 0, 1, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1},
+      {0, 0, 1, 2, 2, 1, 0, 2, 0, 2, 2, 0, 1, 1, 0, 0, 0, 0, 2, 1},
+      {0, 0, 1, 2, 2, 1, 2, 1, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 1},
+      {0, 0, 1, 0, 0, 2, 0, 2, 2, 2, 2, 0, 2, 1, 0, 0, 3, 3, 3, 1},
+      {0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+    };
 
     Maze maze1(mazeLayout1, tileSize);
     Maze maze2(mazeLayout2, tileSize);
+    Maze maze3(mazeLayout3, tileSize);
     Pacman pacman(tileSize * 12.5f, tileSize * 1.5f, tileSize / 2.f - 0.05f, 0.06f);
     Ghost ghost(10.5*tileSize, 9.5*tileSize, Color::White, 1.f, tileSize / 2.f - 1.f);
     Maze labirynt(mazeLayout1, tileSize);
-   
+    std::vector<Maze> mazes = { maze1, maze2, maze3};
+    int currentLevel = 0;
+
 
     while (window.isOpen()) {
         Event event;
@@ -90,66 +115,94 @@ int main() {            // Main function
                 window.close();
 
             if (event.type == Event::KeyPressed) {
-                if (event.key.code == Keyboard::Escape)
+                if (event.key.code == Keyboard::Escape) {
                     window.close();
-                ghost.changeDirection(event.key.code);
-            }
-          /*  if (event.type == sf::Event::KeyPressed) {
-                if (event.key.code == sf::Keyboard::Up) {
-                    // Move selection up
-                    menuText[selectedIndex].setFillColor(sf::Color::White);
-                    selectedIndex = (selectedIndex - 1 + menuItems.size()) % menuItems.size();
-                    menuText[selectedIndex].setFillColor(sf::Color::Yellow);
                 }
-                else if (event.key.code == sf::Keyboard::Down) {
-                    // Move selection down
-                    menuText[selectedIndex].setFillColor(sf::Color::White);
-                    selectedIndex = (selectedIndex + 1) % menuItems.size();
-                    menuText[selectedIndex].setFillColor(sf::Color::Yellow);
+                else if (currentState == GameState::Menu) {
+                    // Handle menu navigation
+                    if (event.key.code == sf::Keyboard::Up) {
+                        // Move selection up
+                        menuText[selectedIndex].setFillColor(sf::Color::White);
+                        selectedIndex = (selectedIndex - 1 + menuItems.size()) % menuItems.size();
+                        menuText[selectedIndex].setFillColor(sf::Color::Yellow);
+                    }
+                    else if (event.key.code == sf::Keyboard::Down) {
+                        // Move selection down
+                        menuText[selectedIndex].setFillColor(sf::Color::White);
+                        selectedIndex = (selectedIndex + 1) % menuItems.size();
+                        menuText[selectedIndex].setFillColor(sf::Color::Yellow);
+                    }
+                    else if (event.key.code == sf::Keyboard::Enter) {
+                        if (selectedIndex == 0) {
+                            // Start Game
+                            std::cout << "Starting Game..." << std::endl;
+                            currentState = GameState::Playing;
+                        }
+                        else if (selectedIndex == 1) {
+                            // Options
+                            std::cout << "Opening Options..." << std::endl;
+                        }
+                        else if (selectedIndex == 2) {
+                            // Exit
+                            window.close();
+                        }
+                    }
                 }
-                else if (event.key.code == sf::Keyboard::Enter) {
-                    if (selectedIndex == 0) {
-                        // Start Game
-                        // Replace with your game start logic
-                        std::cout << "Starting Game..." << std::endl;
+                else if (currentState == GameState::Playing) {
+                    // Handle game-specific controls
+                    pacman.update(maze1);
+                    ghost.move(maze1);
+                    ghost.changeDirection(event.key.code);
 
-                    }
-                    else if (selectedIndex == 1) {
-                        // Options
-                        // Replace with your options logic
-                        std::cout << "Opening Options..." << std::endl;
-                    }
-                    else if (selectedIndex == 2) {
-                        // Exit
+                    if (pacman.checkCollisionWithGhost(ghost.getPosition(), ghost.getRadius())) 
+                    {
+                        std::cout << "Collision! Pac-Man is caught!" << std::endl;
                         window.close();
                     }
+                    else if (maze1.checkWarpGateCollision(ghost.getPosition(), ghost.getRadius()))
+                    {
+                        window.clear();
+                        maze2.render(window);
+                    }
+
+                    
                 }
-            }*/
+            }
         }
+
         window.clear();
-      //  for (const auto& text : menuText) 
-       //     window.draw(text);
-        
-        
-        maze1.render(window);
-        pacman.update(maze1);
-        ghost.move(maze1);
-        ghost.render(window);
-        pacman.renderPacman(window);
+
+        if (currentState == GameState::Menu) {
+            // Render the menu
+            for (const auto& text : menuText)
+                window.draw(text);
+        }
+        else if (currentState == GameState::Playing) {
+            // Render the game
+            maze1.render(window);
+            pacman.renderPacman(window);
+            ghost.render(window);
+        }
+
         window.display();
-        if (maze1.checkWarpGateCollision(ghost.getPosition(), ghost.getRadius())) {
-            window.clear();
-          
-            maze2.render(window);
-            window.display();
-        }
-        if (pacman.checkCollisionWithGhost(ghost.getPosition(), ghost.getRadius())) {
-            std::cout << "Collision! Pac-Man is caught!" << std::endl;
-            window.close(); // End the game or reset logic here
-        }
-        
-       
     }
+
 
     return 0;
 }           
+/*maze1.render(window);
+pacman.update(maze1);
+ghost.move(maze1);
+ghost.render(window);
+pacman.renderPacman(window);
+window.display();
+if (maze1.checkWarpGateCollision(ghost.getPosition(), ghost.getRadius())) {
+    window.clear();
+
+    maze2.render(window);
+    window.display();
+}
+if (pacman.checkCollisionWithGhost(ghost.getPosition(), ghost.getRadius())) {
+    std::cout << "Collision! Pac-Man is caught!" << std::endl;
+    window.close();
+}*/
