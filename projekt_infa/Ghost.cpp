@@ -40,7 +40,6 @@ Vector2f Ghost::getPosition() const {
     return position;
 }
 
-
 float Ghost::getRadius() const {
     return ghostHead.getRadius();
 }
@@ -71,8 +70,21 @@ void Ghost::render(RenderWindow& window) const {
     window.draw(ghostLegs);
     window.draw(ghostHead);
 }
+
 void Ghost::setPosition(float x, float y) {
     position = { x, y };
     ghostHead.setPosition(position);
     ghostLegs.setPosition(position);
+}
+
+void Ghost::setRadius(float GhostRadius) {
+    ghostHead.setRadius(GhostRadius);
+    ghostLegs.setSize(Vector2f(2 * GhostRadius, GhostRadius));
+    ghostLegs.setOrigin(ghostLegs.getSize().x / 2, 0);
+    ghostHead.setOrigin(GhostRadius, GhostRadius);
+}
+
+void Ghost::setColor(Color ghostColor) {
+    ghostLegs.setFillColor(ghostColor);
+    ghostHead.setFillColor(ghostColor);
 }

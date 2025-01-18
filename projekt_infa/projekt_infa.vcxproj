@@ -136,6 +136,7 @@
     <ClCompile Include="Pacman.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Spike.cpp" />
+    <ClCompile Include="TextLabel.cpp" />
     <ClCompile Include="WarpGate.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -145,6 +146,7 @@
     <ClInclude Include="MazeLayouts.h" />
     <ClInclude Include="Pacman.h" />
     <ClInclude Include="Spike.h" />
+    <ClInclude Include="TextLabel.h" />
     <ClInclude Include="WarpGate.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
