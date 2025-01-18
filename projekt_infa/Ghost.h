@@ -21,7 +21,7 @@ public:
     void changeDirection(Keyboard::Key key);
     Vector2f getPosition() const;
     float getRadius() const;
-    void move(Maze& maze);
+    void move(Maze& maze,int& score);
     void render(RenderWindow& window) const;
     void setPosition(float x, float y);
 

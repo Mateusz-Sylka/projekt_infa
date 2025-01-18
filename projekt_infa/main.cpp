@@ -71,7 +71,7 @@ int main() {            // Main function
     Ghost ghost(10.5*tileSize, 9.5*tileSize, Color::White, 1.f, tileSize / 2.f - 1.f);
    
     int currentLevel = 0;
-    int current_score = 0;
+    int currentScore = 0;
     int totalLevels = mazes.size();
 
     while (window.isOpen()) {
@@ -137,13 +137,14 @@ int main() {            // Main function
             ghost.render(window);
 
             // Update movements
-            ghost.move(mazes[currentLevel]);
+            ghost.move(mazes[currentLevel], currentScore);
             pacman.update(mazes[currentLevel]);
 
             // Check for collisions
             if (pacman.checkCollisionWithGhost(ghost.getPosition(), ghost.getRadius())) {
-                std::cout << "Collision! Pac-Man is caught!" << std::endl;
-               // currentState = GameState::GameOver;  // You can transition to a game over state here
+                std::cout << "Collision! Ghost is caught!" << std::endl;
+                ghost.setPosition(tileSize * 10.5f, tileSize * 9.5f);
+               
             }
 
             // Check for warp gate collisions and move to next level
@@ -156,9 +157,7 @@ int main() {            // Main function
                 ghost.setPosition(tileSize * 10.5f, tileSize * 9.5f);    // Example starting position for Ghost
             }
         }
-       // else if (currentState == GameState::GameOver) {
-            // Render game over screen (not implemented here)
-       // }
+       
 
         window.display();
     }

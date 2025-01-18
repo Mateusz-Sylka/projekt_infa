@@ -45,7 +45,7 @@ float Ghost::getRadius() const {
     return ghostHead.getRadius();
 }
 
-void Ghost::move(Maze& maze) {
+void Ghost::move(Maze& maze, int& score) {
     Vector2f newPosition = position + velocity;
 
     if (maze.checkSpikeCollision(newPosition, ghostHead.getRadius())) {
@@ -59,6 +59,8 @@ void Ghost::move(Maze& maze) {
 
     if (maze.checkCoinCollision(position, ghostHead.getRadius())) {
         std::cout << "Ghost collected a coin!" << std::endl;
+        score += 10; // Increment the score directly
+        std::cout << "score is" << score << std::endl;
     }
 
     ghostHead.setPosition(position);
