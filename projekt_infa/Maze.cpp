@@ -9,9 +9,12 @@ Maze::Maze(const std::vector<std::vector<int>>& layout, float tileSize, Color wa
 }
 
 void Maze::render(RenderWindow& window) const {
-    for (size_t y = 0; y < layout.size(); ++y) {
-        for (size_t x = 0; x < layout[y].size(); ++x) {
-            if (layout[y][x] == 1) { // Wall
+    for (size_t y = 0; y < layout.size(); ++y) 
+    {
+        for (size_t x = 0; x < layout[y].size(); ++x) 
+        {
+            if (layout[y][x] == 1) 
+            { // Wall
                 RectangleShape wall(Vector2f(tileSize, tileSize));
                 wall.setFillColor(wallColor);
                 wall.setPosition(static_cast<float>(x) * tileSize, static_cast<float>(y) * tileSize);
@@ -19,10 +22,8 @@ void Maze::render(RenderWindow& window) const {
             }
         }
     }
-
     for (const auto& coin : coins)
         coin.render(window);
-
 
     for (const auto& spike : spikes)
         spike.render(window);
@@ -112,7 +113,3 @@ bool Maze::isWalkable(Vector2f position, float radius) const {
     }
     return true; // All points are walkable
 }
-
-const std::vector<Coin>& Maze::getCoins() const {
-    return coins;
-}  // Return the reference to the coins vector

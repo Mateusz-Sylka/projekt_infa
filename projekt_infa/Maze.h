@@ -29,7 +29,6 @@ public:
     bool checkCoinCollision(Vector2f colliderPosition, float colliderRadius);
     void initializeCoins();
     bool isWalkable(Vector2f position, float radius) const;
-    const std::vector<Coin>& getCoins() const;
 };
 
 #endif // MAZE_H
