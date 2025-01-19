@@ -9,7 +9,6 @@
 class GameData {
 private:
     std::string filename;
-    std::vector<bool> coinStates;  // Vector to track coin collection status
 
 public:
     GameData(const std::string& file) : filename(file) {}
