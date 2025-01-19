@@ -131,20 +131,29 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Coins.cpp" />
+    <ClCompile Include="Exiting.cpp" />
     <ClCompile Include="Ghost.cpp" />
+    <ClCompile Include="HelpScreen.cpp" />
     <ClCompile Include="Maze.cpp" />
+    <ClCompile Include="Menu.cpp" />
     <ClCompile Include="Pacman.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Spike.cpp" />
     <ClCompile Include="TextLabel.cpp" />
     <ClCompile Include="WarpGate.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Coins.h" />
+    <ClInclude Include="Exiting.h" />
+    <ClInclude Include="GameData.h" />
     <ClInclude Include="Ghost.h" />
+    <ClInclude Include="HelpScreen.h" />
     <ClInclude Include="Maze.h" />
     <ClInclude Include="MazeLayouts.h" />
+    <ClInclude Include="Menu.h" />
     <ClInclude Include="Pacman.h" />
+    <ClInclude Include="Settings.h" />
     <ClInclude Include="Spike.h" />
     <ClInclude Include="TextLabel.h" />
     <ClInclude Include="WarpGate.h" />

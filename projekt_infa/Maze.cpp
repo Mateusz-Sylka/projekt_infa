@@ -23,6 +23,7 @@ void Maze::render(RenderWindow& window) const {
     for (const auto& coin : coins)
         coin.render(window);
 
+
     for (const auto& spike : spikes)
         spike.render(window);
 
@@ -111,3 +112,7 @@ bool Maze::isWalkable(Vector2f position, float radius) const {
     }
     return true; // All points are walkable
 }
+
+const std::vector<Coin>& Maze::getCoins() const {
+    return coins;
+}  // Return the reference to the coins vector

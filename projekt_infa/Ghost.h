@@ -21,11 +21,12 @@ public:
     void changeDirection(Keyboard::Key key);
     Vector2f getPosition() const;
     float getRadius() const;
-    void move(Maze& maze,int& score);           //moving and collision with coins, spikes
+    void move(Maze& maze);           
     void render(RenderWindow& window) const;        //render of legs and head
     void setPosition(float x, float y);
     void setRadius(float GhostRadius);
     void setColor(Color ghostColor);
+    Color getColor() const;
     
 };
 

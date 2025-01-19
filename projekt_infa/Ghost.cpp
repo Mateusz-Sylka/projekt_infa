@@ -44,23 +44,11 @@ float Ghost::getRadius() const {
     return ghostHead.getRadius();
 }
 
-void Ghost::move(Maze& maze, int& score) {
+void Ghost::move(Maze& maze) {
     Vector2f newPosition = position + velocity;
 
-    if (maze.checkSpikeCollision(newPosition, ghostHead.getRadius())) {
-        std::cout << "Game Over! Ghost hit a spike!" << std::endl;
-        exit(0); // Exit the game
-    }
-
-    if (maze.isWalkable(newPosition, ghostHead.getRadius())) {
-        position = newPosition;
-    }
-
-    if (maze.checkCoinCollision(position, ghostHead.getRadius())) {
-        std::cout << "Ghost collected a coin!" << std::endl;
-        score += 10; // Increment the score directly
-        std::cout << "score is" << score << std::endl;
-    }
+    if (maze.isWalkable(newPosition, ghostHead.getRadius())) 
+        position = newPosition;     
 
     ghostHead.setPosition(position);
     ghostLegs.setPosition(position);
@@ -87,4 +75,8 @@ void Ghost::setRadius(float GhostRadius) {
 void Ghost::setColor(Color ghostColor) {
     ghostLegs.setFillColor(ghostColor);
     ghostHead.setFillColor(ghostColor);
+}
+
+Color Ghost::getColor() const {
+    return ghostHead.getFillColor();
 }

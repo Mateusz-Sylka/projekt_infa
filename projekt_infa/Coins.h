@@ -6,20 +6,18 @@
 #include <vector>
 using namespace sf;
 
-class Coins
+class Coin
 {
 private:
     CircleShape shape;
     bool collected;
 
 public:
-    Coins(float x, float y, float radius); //constuctor
-       
-           
+    Coin(float x, float y, float radius); //constuctor
+                 
     // Render the coin
     void render(RenderWindow& window) const;
        
-
     // Check if the coin has been collected
     bool isCollected() const;
  
