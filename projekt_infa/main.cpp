@@ -32,6 +32,13 @@ enum class GameState {
     Winning
 };
 
+void resetGame(int& currentLevel, int& currentScore, std::vector<int>& levelScores, Pacman& pacman, Ghost& ghost, float tileSize) {
+    currentLevel = 0;
+    currentScore = 0;
+    std::fill(levelScores.begin(), levelScores.end(), 0); // Reset level scores to 0
+
+    ghost.setPosition(tileSize * 10.5f, tileSize * 9.5f);
+}
 
 int main() 
 {            // Main function
@@ -90,17 +97,7 @@ int main()
     int currentLevel = 0; 
     int totalLevels = mazes.size();
 
-    std::vector<bool> coinStates;
-
-    TextLabel Won("You won!!!", font);
-    Won.setPosition(screenWidth / 2, screenHeight / 2);
-    Won.setSize(60);
-    Won.centerOrigin();
-
-    TextLabel next("Press enter to continue", font);
-    next.centerOrigin();
-    next.setPosition(screenWidth / 2, 300);
-
+    std::vector<int> levelScores(totalLevels, 0); // Initialize with 0 scores for all levels
 
     while (window.isOpen()) 
     {
@@ -121,7 +118,19 @@ int main()
                 else if (event.key.code == Keyboard::Escape && currentState == GameState::Winning) 
                     currentState = GameState::Menu;
                 else if (event.key.code == Keyboard::Escape && currentState == GameState::Help)  
-                    currentState = GameState::Menu;
+                    currentState = GameState::Menu;              
+                else if (event.key.code == Keyboard::Enter && currentState == GameState::Winning) 
+                {
+                    resetGame(currentLevel, currentScore, levelScores, pacman, ghost, tileSize);
+                    currentState = GameState::Playing; // Restart the game
+                    currentLevel = 0;
+                }
+                else if (event.key.code == Keyboard::Escape &&currentState == GameState::Winning) 
+                {
+                    resetGame(currentLevel, currentScore, levelScores, pacman, ghost, tileSize);
+                    currentState = GameState::Menu; // Return to the main menu
+                    currentLevel = 0;
+                }
 
                 else if (event.key.code == Keyboard::F1 && currentState == GameState::Playing)         //F1 for help
                     currentState = GameState::Help;
@@ -137,17 +146,18 @@ int main()
                         switch (menu.getSelectedIndex()) 
                         {
                         case 0: currentState = GameState::Playing; break;
-                        case 1: 
-                            if (gameData.load(currentScore, currentLevel,coinStates))
-                            {
-                            std::cout << "Loaded Score: " << currentScore << ", Level: " << currentLevel << std::endl;
-                            currentState = GameState::Playing;
-                            pacman.setPosition(Vector2f(tileSize * 12.5f, tileSize * 1.5f)); // Reset Pacman position
-                            ghost.setPosition(tileSize * 10.5f, tileSize * 9.5f);            // Reset Ghost position
-                            }
-                            else                          
-                            std::cout << "No saved game to load." << std::endl;
+                        case 1: if (gameData.load(levelScores, currentLevel))
+                        {
+                            std::cout << "Loaded Scores: ";
+                            for (int i = 0; i < levelScores.size(); ++i) 
+                                std::cout << "Level " << i + 1 << ": " << levelScores[i] << " ";
                             
+                            std::cout << std::endl;
+                            currentScore = levelScores[currentLevel]; // Set the score for the current level
+                         }
+                                else 
+                                 std::cout << "No saved game to load." << std::endl;
+                                                                                         
                             break;
                         case 2: currentState = GameState::Settings; break;
                         case 3: currentState = GameState::Exiting; break;
@@ -231,26 +241,45 @@ int main()
             }
 
             // Check for warp gate collisions and move to next level
-            if (mazes[currentLevel].checkWarpGateCollision(ghost.getPosition(), ghost.getRadius())) 
+            if (mazes[currentLevel].checkWarpGateCollision(ghost.getPosition(), ghost.getRadius()))
             {
-                currentLevel = (currentLevel + 1);  // Wrap around to the first level if at the end
-                if (currentLevel == 4)
+                levelScores[currentLevel] = currentScore; // Save the score for the completed level
+                currentLevel++; // Move to the next level
+                if (currentLevel == totalLevels) 
                     currentState = GameState::Winning;
-                // Reset positions for the new level
-                pacman.setPosition(Vector2f(tileSize * 12.5f, tileSize * 1.5f));  // Example starting position for Pacman
-                ghost.setPosition(tileSize * 10.5f, tileSize * 9.5f);    // Example starting position for Ghost
+                
+                pacman.setPosition(Vector2f(tileSize * 12.5f, tileSize * 1.5f)); // Reset positions
+                ghost.setPosition(tileSize * 10.5f, tileSize * 9.5f);
             }
+            gameData.save(levelScores, currentLevel);
+
             scoreText.render(window);
             levelText.render(window);
             levelText.setText("Level: " + std::to_string(currentLevel+1));
             scoreText.setText("Score: " + std::to_string(currentScore));
         }
-        else if (currentState == GameState::Winning) {
-            Won.render(window);
-            scoreText.centerOrigin();
-            scoreText.setPosition(screenWidth / 2, 50);\
-            scoreText.render(window);
-            next.render(window);
+        else if (currentState == GameState::Winning)
+        {
+            // Calculate total score
+            int totalScore = 0;
+            for (int score : levelScores) {
+                totalScore += score;
+            }
+            // Display the winning message and total score
+            TextLabel winningText("Congratulations! Total Score: " + std::to_string(totalScore), font);
+            winningText.centerOrigin();
+            winningText.setPosition(screenWidth / 2, screenHeight / 2 - 50);
+
+            TextLabel restartText("Press Enter to Play Again or Escape to Return to Menu", font);
+            restartText.centerOrigin();
+            restartText.setPosition(screenWidth / 2, screenHeight / 2 + 50);
+
+            winningText.render(window);
+            restartText.render(window);
+
+            if (event.type == Event::KeyPressed) {
+                
+            }
         }
         else if (currentState == GameState::Help) 
             helpScreen.render(window);
@@ -262,17 +291,6 @@ int main()
         else if (currentState == GameState::Exiting)
         {
             exitingScreen.render(window);
-            if (event.type == Event::KeyPressed && event.key.code == Keyboard::Enter)
-            {
-                if (exitingScreen.isYesSelected())
-                {
-                    gameData.save(currentScore, currentLevel,coinStates);
-                    std::cout << "Game data saved on exit." << std::endl;
-                    window.close();
-                }
-                else
-                    currentState = GameState::Menu; // Return to menu
-            }
         }
 
         window.display();
