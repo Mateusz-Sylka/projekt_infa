@@ -5,22 +5,25 @@
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include <sstream>
 
 class GameData {
 private:
     std::string filename;
+    std::vector<bool> coinStates;  // Vector to track coin collection status
 
 public:
     GameData(const std::string& file) : filename(file) {}
 
-    // Save scores for all levels and the current level to file
-    void save(const std::vector<int>& scores, int level) {
+    // Save score, level, and coin states to file
+    void save(int score, int level, const std::vector<bool>& coinsCollected) {
         std::ofstream file(filename);
         if (file.is_open()) {
-            file << level << std::endl; // Save the current level
-            for (const int& score : scores) {
-                file << score << " "; // Save all level scores in a single line
+            file << score << std::endl;
+            file << level << std::endl;
+
+            // Save coin states
+            for (bool state : coinsCollected) {
+                file << state << " ";  // Store the state of each coin (true/false)
             }
             file << std::endl;
             file.close();
@@ -31,20 +34,20 @@ public:
         }
     }
 
-    // Load scores for all levels and the current level from file
-    bool load(std::vector<int>& scores, int& level) {
+    // Load score, level, and coin states from file
+    bool load(int& score, int& level, std::vector<bool>& coinsCollected) {
         std::ifstream file(filename);
         if (file.is_open()) {
-            file >> level; // Load the current level
-            scores.clear(); // Clear the scores vector
-            std::string line;
-            std::getline(file, line); // Move to the next line for scores
-            std::getline(file, line);
-            std::istringstream iss(line);
-            int score;
-            while (iss >> score) {
-                scores.push_back(score);
+            file >> score;
+            file >> level;
+
+            // Load coin states
+            coinsCollected.clear();
+            bool state;
+            while (file >> state) {
+                coinsCollected.push_back(state);
             }
+
             file.close();
             std::cout << "Game data loaded from " << filename << std::endl;
             return true;
