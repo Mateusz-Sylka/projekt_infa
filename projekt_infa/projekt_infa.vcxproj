@@ -132,6 +132,7 @@
   <ItemGroup>
     <ClCompile Include="Coins.cpp" />
     <ClCompile Include="Exiting.cpp" />
+    <ClCompile Include="GameData.cpp" />
     <ClCompile Include="Ghost.cpp" />
     <ClCompile Include="HelpScreen.cpp" />
     <ClCompile Include="Maze.cpp" />
