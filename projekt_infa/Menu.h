@@ -5,18 +5,20 @@
 #include <vector>
 #include <string>
 
+using namespace sf;
+
 class Menu {
 private:
-    std::vector<sf::Text> menuText;
+    std::vector<Text> menuText;
     int selectedIndex;
-    sf::Font& font;
+   Font& font;
 
 public:
-    Menu(const std::vector<std::string>& items, sf::Font& font, float startY, float spacing, sf::RenderWindow& window);
+    Menu(const std::vector<std::string>& items, Font& font, float startY, float spacing, RenderWindow& window);
     void moveUp();
     void moveDown();
     int getSelectedIndex() const;
-    void render(sf::RenderWindow& window) const;
+    void render(RenderWindow& window) const;
 };
 
 #endif // MENU_H

@@ -9,7 +9,8 @@ Pacman::Pacman(float startX, float startY, float radius, float speed)
     updateShape();
 }
 
-void Pacman::move(const Maze& maze) {
+void Pacman::move(const Maze& maze) 
+{
     Vector2f newPosition = position + velocity;
 
     if (!maze.isWalkable(newPosition, pacRadius)) {

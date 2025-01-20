@@ -26,7 +26,7 @@ public:
     void renderPacman(RenderWindow& window) const;
     bool checkCollisionWithGhost(Vector2f ghostPosition, float ghostRadius) const;
     void update(const Maze& maze);
-    void setPosition(sf::Vector2f newPosition);
+    void setPosition(Vector2f newPosition);
     void setRadius(float newRadius);
     float getRadius() const;
     Vector2f getPosition() const;

@@ -8,7 +8,8 @@ Maze::Maze(const std::vector<std::vector<int>>& layout, float tileSize, Color wa
     initializeWarpGate();
 }
 
-void Maze::render(RenderWindow& window) const {
+void Maze::render(RenderWindow& window) const 
+{
     for (size_t y = 0; y < layout.size(); ++y) {
         for (size_t x = 0; x < layout[y].size(); ++x) {
             if (layout[y][x] == 1) { // Wall

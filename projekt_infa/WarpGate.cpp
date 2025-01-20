@@ -1,6 +1,6 @@
 #include "WarpGate.h"
 
-WarpGate::WarpGate(float x, float y, float size, sf::Color color)
+WarpGate::WarpGate(float x, float y, float size, Color color)
     : activated(false) {
     gate.setSize({ size, size });
     gate.setFillColor(color);
@@ -8,28 +8,27 @@ WarpGate::WarpGate(float x, float y, float size, sf::Color color)
     gate.setPosition(x, y);
 }
 
-void WarpGate::render(sf::RenderWindow& window) const {
+void WarpGate::render(RenderWindow& window) const {
     window.draw(gate);
 }
 
-bool WarpGate::checkCollision(sf::Vector2f colliderPosition, float colliderRadius) {
-    // Get the center of the gate
-    sf::Vector2f gateCenter = gate.getPosition();
+bool WarpGate::checkCollision(Vector2f colliderPosition, float colliderRadius) {
+    // Get the center and size of the square gate
+    Vector2f gateCenter = gate.getPosition();
+    float halfSize = gate.getSize().x / 2; // Assuming gate is square
 
-    // Calculate the squared distance between the collider and the gate center
-    float deltaX = colliderPosition.x - gateCenter.x;
-    float deltaY = colliderPosition.y - gateCenter.y;
-    float distanceSquared = deltaX * deltaX + deltaY * deltaY;
+    // Calculate the bounds of the square, extended by the circle's radius
+    float left = gateCenter.x - halfSize - colliderRadius;
+    float right = gateCenter.x + halfSize + colliderRadius;
+    float top = gateCenter.y - halfSize - colliderRadius;
+    float bottom = gateCenter.y + halfSize + colliderRadius;
 
-    // Calculate the sum of the radii
-    float combinedRadii = colliderRadius + gate.getSize().x / 2;
-
-    // Compare squared distances to avoid using the expensive square root function
-    if (distanceSquared < combinedRadii * combinedRadii) {
+    // Check if the circle's center is within these bounds
+    if (colliderPosition.x > left && colliderPosition.x < right &&
+        colliderPosition.y > top && colliderPosition.y < bottom) {
         activated = true; // Activate the gate on collision
         return true;      // Indicate a collision occurred
     }
-
     return false;
 }
 
