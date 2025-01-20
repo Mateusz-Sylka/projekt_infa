@@ -1,7 +1,7 @@
 #include "TextLabel.h"
 #include <stdexcept>
 
-TextLabel::TextLabel(const std::string& labelText, Font& font,    float x, float y, unsigned int size, Color color)
+TextLabel::TextLabel(const std::string& labelText, Font& font, float x, float y, unsigned int size, Color color)
     {
 
     text.setFont(font);

@@ -24,7 +24,8 @@
 
 using namespace sf;
 
-enum class GameState {
+enum class GameState 
+{
     Menu,
     Playing,
     Exiting,
@@ -122,7 +123,8 @@ int main()
                         window.close();
                     else if (event.key.code == Keyboard::F1 && currentState == GameState::Playing)
                         currentState = GameState::Help;
-                    else if (event.key.code == Keyboard::Escape || event.key.code == Keyboard::Enter && currentState == GameState::Winning) {
+                    else if (event.key.code == Keyboard::Escape || event.key.code == Keyboard::Enter && currentState == GameState::Winning) 
+                    {
                         window.close();
                         break; // Break the game loop to restart                   
                     }
@@ -140,17 +142,18 @@ int main()
                             {
                             case 0: currentState = GameState::Playing; break;      
                             case 1:
-                                if (gameData.getCurrentLevel() != 0) {
+                                if (gameData.getCurrentLevel() != 0)
+                                {
                                     gameData.load(scores, currentLevel);                          
                                     std::cout << ", Level: " << currentLevel << std::endl;
                                     currentState = GameState::Playing;
                                     pacman.setPosition(Vector2f(tileSize * 12.5f, tileSize * 1.5f));
                                     ghost.setPosition(tileSize * 10.5f, tileSize * 9.5f);
                                 }
-                                else {
+                                else 
                                     std::cout << "No saved game to load." << std::endl;
-                                }
-                                break;
+                                
+                            break;
                             case 2: currentState = GameState::Settings; break;
                             case 3: currentState = GameState::Exiting; break;
                             case 4: currentState = GameState::Help; break;
@@ -220,16 +223,24 @@ int main()
                     currentScore -= 50;
                     ghost.setPosition(tileSize * 10.5f, tileSize * 9.5f);
                 }
-                if (mazes[currentLevel].checkWarpGateCollision(ghost.getPosition(), ghost.getRadius())) {
+                if (mazes[currentLevel].checkWarpGateCollision(ghost.getPosition(), ghost.getRadius())) 
+                {
                     scores[currentLevel] = currentScore; // Save the current score for this level
                     currentLevel = (currentLevel + 1);
                     gameData.save(currentScore, currentLevel);
 
                     
-                    if (currentLevel >= totalLevels) {
+                    if (currentLevel >= totalLevels) 
                         currentState = GameState::Winning;
+                    
+                    else if (currentLevel == 1)
+                    {
+                        pacman.setPosition(Vector2f(tileSize * 16.5f, tileSize * 1.5f));
+                        ghost.setPosition(tileSize * 10.5f, tileSize * 9.5f);
+                        currentScore = scores[currentLevel]; // Load the score for the next level
                     }
-                    else {
+                    else 
+                    {
                         pacman.setPosition(Vector2f(tileSize * 12.5f, tileSize * 1.5f));
                         ghost.setPosition(tileSize * 10.5f, tileSize * 9.5f);
                         currentScore = scores[currentLevel]; // Load the score for the next level
@@ -242,15 +253,12 @@ int main()
             }
             else if (currentState == GameState::Winning)
             {
-                // Calculate the total score from all levels
-                int totalScore = std::accumulate(scores.begin(), scores.end(), 0);
-
-                // Update the score text to show the total score
+                // Calculate the total score and write it
+                int totalScore = std::accumulate(scores.begin(), scores.end(), 0);            
                 scoreText.setText("Total Score: " + std::to_string(totalScore));
                 scoreText.centerOrigin();
                 scoreText.setPosition(screenWidth / 2, 50);
 
-                // Render the winning message and total score
                 Won.render(window);
                 scoreText.render(window);
                 next.render(window);
