@@ -27,6 +27,12 @@ GameData::GameData(const std::string& filePath) : saveFilePath(filePath) {
 
 
 void GameData::save(int currentScore, int currentLevel) {
+    // Update the levelScores vector with the current score
+    if (currentLevel < levelScores.size()) {
+        levelScores[currentLevel] = currentScore; // Update the score for the current level
+    }
+
+    // Save to the file
     std::ofstream file(saveFilePath); // Open the file for writing
     if (file.is_open()) {
         file << currentLevel << std::endl; // Save the current level first
@@ -38,9 +44,18 @@ void GameData::save(int currentScore, int currentLevel) {
         }
         file << std::endl; // End the scores line
         file.close();
+
+        // Debugging output
+        std::cout << "Saved GameData: Level " << currentLevel << ", Scores: ";
+        for (int score : levelScores) {
+            std::cout << score << " ";
+        }
+        std::cout << std::endl;
+    }
+    else {
+        std::cerr << "Failed to open save file for writing.\n";
     }
 }
-
 
 
 void GameData::load(std::vector<int>& scores, int& currentLevel) {
@@ -60,7 +75,6 @@ void GameData::load(std::vector<int>& scores, int& currentLevel) {
 }
 
 
-
 int GameData::getLevelScore(int level) const {
     return levelScores[level];
 }
@@ -76,6 +90,22 @@ int GameData::getCurrentLevel() const {
 }
 
 void GameData::reset() {
-    levelScores = std::vector<int>(4, 0);
-    currentLevel = 0;
+    levelScores = std::vector<int>(4, 0); // Reset scores for all levels
+    currentLevel = 0;                    // Reset current level to 0
+    std::ofstream file(saveFilePath);    // Overwrite the save file
+    if (file.is_open()) {
+        file << currentLevel << std::endl;
+        for (size_t i = 0; i < levelScores.size(); ++i) {
+            file << levelScores[i];
+            if (i < levelScores.size() - 1) {
+                file << " ";
+            }
+        }
+        file << std::endl;
+        file.close();
+        std::cout << "Save file has been reset.\n";
+    }
+    else {
+        std::cerr << "Failed to reset save file.\n";
+    }
 }

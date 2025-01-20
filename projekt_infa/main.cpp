@@ -141,9 +141,8 @@ int main()
                             case 0: currentState = GameState::Playing; break;      
                             case 1:
                                 if (gameData.getCurrentLevel() != 0) {
-                                    gameData.load(scores, currentLevel);
-                                    currentScore = scores[currentLevel];  // Load the score for the current level
-                                    std::cout << "Loaded Score: " << currentScore << ", Level: " << currentLevel << std::endl;
+                                    gameData.load(scores, currentLevel);                          
+                                    std::cout << ", Level: " << currentLevel << std::endl;
                                     currentState = GameState::Playing;
                                     pacman.setPosition(Vector2f(tileSize * 12.5f, tileSize * 1.5f));
                                     ghost.setPosition(tileSize * 10.5f, tileSize * 9.5f);
@@ -255,6 +254,7 @@ int main()
                 Won.render(window);
                 scoreText.render(window);
                 next.render(window);
+                gameData.reset();
             }
             else if (currentState == GameState::Help)
                 helpScreen.render(window);
