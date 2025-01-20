@@ -78,7 +78,7 @@ int main()
 
         Exiting exitingScreen(font, screenWidth, screenHeight);
 
-        Pacman pacman(tileSize * 12.5f, tileSize * 1.5f, tileSize / 2.f - 0.05f, 0.06f);
+        Pacman pacman(tileSize * 16.5f, tileSize * 0.5f, tileSize / 2.f - 0.05f, 0.06f);
         Ghost ghost(10.5 * tileSize, 9.5 * tileSize, ghostColor, 0.5, tileSize / 2.f - 1.f);
 
         TextLabel scoreText("current score", font);
